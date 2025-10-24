@@ -99,7 +99,6 @@ SUBSTITUTIONS: List[Substitution] = [
     Substitution(['OiBu'], '[OH0;D2][CH2;D2][CH1;D3]([CH3])[CH3]', "[O]CC(C)C", 0.2),
     Substitution(['OtBu'], '[OH0;D2][CH0]([CH3])([CH3])[CH3]', "[O]C(C)(C)C", 0.6),
     Substitution(['tBu', 't-Bu'], '[CH0]([CH3])([CH3])[CH3]', "[C](C)(C)C", 0.3),
-    Substitution(['CO2tBu', 'CO2tBu'], '[CH2;D2][CH2;D2][CH1;D3]([CH3])[CH3]', "[C](=O)O[CH2]CC(C)C", 0.3),
     Substitution(['CO2Me', 'MeO2C'], '[C](=O)OC', "[C](=O)OC", 0.3),
     Substitution(['MeO2CO', 'OCO2Me'], '[O]C(=O)OC', "[O]C(=O)OC", 0.3),
     Substitution(['ONa', 'NaO'], '[O-].[Na+]', "[O-].[Na+]", 0.3),
@@ -195,7 +194,24 @@ SUBSTITUTIONS: List[Substitution] = [
 
     Substitution(['[CF3]2C6H3', '3,5-[CF3]2C6H3','3,5-(CF3)2C6H3'], '[c]1cc(C(F)(F)F)cc(C(F)(F)F)c1', "[c]1cc(C(F)(F)F)cc(C(F)(F)F)c1", 0.4),
 
+   ###NEW
+    Substitution(['B(OH)2','B(0H)2'],'B(O)O','B(O)O',0.5),
+    Substitution(['CF2H','HF2C','F2C'],'C(F)(F)','C(F)(F)',0.5),
+    Substitution(['SCF3','ScF3','SO3F'],'SC(F)(F)F','SC(F)(F)F',0.5),
+    Substitution(['F3'],'(F)(F)F','(F)(F)F',0.5),
+    Substitution(['AgSe','AgScF3'],'[Ag+].[S-]C(F)(F)F','[Ag+].[S-]C(F)(F)F',0.5),
+    Substitution(['Me3Si'],'[Si](C)(C)C','[Si](C)(C)C',0.5),
+    Substitution(['(H)'],'H','H',0.5),
+    Substitution(['CN'],'C#N','C#N',0.5),
+    Substitution(['SN'],'SN','SN',0.5),
 
+    Substitution(['N((SO2Ph))2'],'N(S(=O)(=O)c1ccccc1)S(=O)(=O)c1ccccc1','N(S(=O)(=O)c1ccccc1)S(=O)(=O)c1ccccc1',0.5),
+    Substitution(['NHTs'],'NS(=O)(=O)c1ccc(cc1)C','NS(=O)(=O)c1ccc(cc1)C',0.5),
+    Substitution(['OCOCH3'],'OC(=O)C','OC(=O)C',0.5),
+    Substitution(['CO2tBu', 'CO2tBu'], 'C(=O)OC(C)(C)C', "C(=O)OC(C)(C)C", 0.3),#这个替换好像不太对
+    Substitution(['ScH3','SCH3'],'SC','SC',0.5),
+    Substitution(['n-Pent'],'CCCCC','CCCCC',0.5),
+    Substitution(['H3','H'],'','',0.5),
 
 ]
 
