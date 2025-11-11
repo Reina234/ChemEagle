@@ -31,19 +31,24 @@ if not API_KEY:
 AZURE_ENDPOINT = os.getenv("AZURE_ENDPOINT")
 API_VERSION = os.getenv("API_VERSION")
 
-def ChemEagle(image_path: str) -> dict:
+def ChemEagle(
+    image_path: str,
+    use_plan_observer: bool = False,
+    use_action_observer: bool = False,
+) -> dict:
+
     client = AzureOpenAI(
         api_key=API_KEY,
-        api_version=API_VERSION,
+        api_version='2024-06-01',
         azure_endpoint=AZURE_ENDPOINT
     )
-
 
     def encode_image(image_path: str):
         with open(image_path, "rb") as image_file:
             return base64.b64encode(image_file.read()).decode('utf-8')
 
     base64_image = encode_image(image_path)
+
     tools = [
         {
         'type': 'function',
@@ -84,7 +89,7 @@ def ChemEagle(image_path: str) -> dict:
             {
         'type': 'function',
         'function': {
-            'name': 'get_full_reaction',
+            'name': 'get_full_reaction_template',
             'description': 'After you carefully check the image, if this is a reaction image that contains only a text-based table and does not involve any R-group replacement, or this is a reaction image does not contain any tables or sets of product variants, then just call this simplified tool.',
             'parameters': {
                 'type': 'object',
@@ -119,22 +124,24 @@ def ChemEagle(image_path: str) -> dict:
             },
     ]
 
-    with open('./prompt/prompt_final_simple_version.txt', 'r') as prompt_file:
+    # 提供给 GPT 的消息内容
+    with open('./prompt/prompt_final_simple_version.txt', 'r',encoding='utf-8') as prompt_file:
         prompt = prompt_file.read()
-    with open('./prompt/prompt_plan.txt', 'r') as prompt_file:
+    with open('./prompt/prompt_plan.txt', 'r',encoding='utf-8') as prompt_file:
         prompt_plan = prompt_file.read()
-    
+
     messages = [
         {'role': 'system', 'content': 'You are a helpful assistant.'},
         {
             'role': 'user',
             'content': [
-                {'type': 'text', 'text': prompt_plan},
+                {'type': 'text', 'text': prompt},
                 {'type': 'image_url', 'image_url': {'url': f'data:image/png;base64,{base64_image}'}}
             ]
         }
     ]
 
+    # 调用 GPT 接口
     response = client.chat.completions.create(
     model = 'gpt-4o',
     temperature = 0,
@@ -158,40 +165,109 @@ def ChemEagle(image_path: str) -> dict:
     ],
     tools = tools)
     
-
+# Step 1: 工具映射表
     TOOL_MAP = {
         'process_reaction_image_with_product_variant_R_group': process_reaction_image_with_product_variant_R_group,
         'process_reaction_image_with_table_R_group': process_reaction_image_with_table_R_group,
-        'get_full_reaction': get_full_reaction,
+        'get_full_reaction_template': get_full_reaction_template,
         'get_multi_molecular_full': get_multi_molecular_full
     }
 
+    # Step 2: 处理多个工具调用
+    raw_tool_calls = response.choices[0].message.tool_calls or []
+    serialized_calls = []
+    for idx, tool_call in enumerate(raw_tool_calls):
+        try:
+            args = json.loads(tool_call.function.arguments or "{}")
+        except json.JSONDecodeError:
+            args = {}
+        serialized_calls.append({
+            "id": getattr(tool_call, "id", f"tool_call_{idx}"),
+            "name": tool_call.function.name,
+            "arguments": args,
+        })
 
-    tool_calls = response.choices[0].message.tool_calls
-    print(f"tool_calls:{tool_calls}")
+    if use_plan_observer:
+        reviewed_plan = plan_observer_agent(image_path, serialized_calls)
+        if not isinstance(reviewed_plan, list) or not reviewed_plan:
+            plan_to_execute = serialized_calls
+        else:
+            plan_to_execute = []
+            for idx, item in enumerate(reviewed_plan):
+                name = item.get("name") or item.get("tool_name")
+                if not name:
+                    continue
+                args = item.get("arguments", {})
+                if isinstance(args, str):
+                    try:
+                        args = json.loads(args)
+                    except json.JSONDecodeError:
+                        args = {}
+                call_id = item.get("id") or f"observer_call_{idx}"
+                plan_to_execute.append({
+                    "id": call_id,
+                    "name": name,
+                    "arguments": args,
+                })
+            if not plan_to_execute:
+                plan_to_execute = serialized_calls
+    else:
+        plan_to_execute = serialized_calls
+
+    print(f"plan_to_execute:{plan_to_execute}")
+    execution_logs = []
     results = []
 
-    for tool_call in tool_calls:
-        tool_name = tool_call.function.name
-        tool_arguments = tool_call.function.arguments
-        tool_call_id = tool_call.id
-        
-        tool_args = json.loads(tool_arguments)
-        
+    for idx, plan_item in enumerate(plan_to_execute):
+        tool_name = plan_item["name"]
+        tool_call_id = plan_item["id"] or f"observer_call_{idx}"
+        tool_args = plan_item.get("arguments", {}) or {}
+        if "image_path" not in tool_args:
+            tool_args["image_path"] = image_path
+
         if tool_name in TOOL_MAP:
-            # 调用工具并获取结果
-            tool_result = TOOL_MAP[tool_name](image_path)
+            tool_func = TOOL_MAP[tool_name]
+            tool_result = tool_func(**tool_args)
         else:
             raise ValueError(f"Unknown tool called: {tool_name}")
+
+        execution_logs.append({
+            "id": tool_call_id,
+            "name": tool_name,
+            "arguments": tool_args,
+            "result": tool_result,
+        })
 
         results.append({
             'role': 'tool',
             'content': json.dumps({
                 'image_path': image_path,
-                f'{tool_name}':(tool_result),
+                tool_name: tool_result,
             }),
             'tool_call_id': tool_call_id,
         })
+
+    if use_action_observer and action_observer_agent(image_path, execution_logs):
+        return {
+            "redo": True,
+            "plan": plan_to_execute,
+            "execution_logs": execution_logs,
+        }
+
+    observer_plan_message = {
+        "role": "assistant",
+        "tool_calls": [
+            {
+                "id": item["id"],
+                "type": "function",
+                "function": {
+                    "name": item["name"],
+                    "arguments": json.dumps(item.get("arguments", {})),
+                },
+            }
+            for item in plan_to_execute
+        ],
+    }
 
 
 # Prepare the chat completion payload
@@ -214,7 +290,7 @@ def ChemEagle(image_path: str) -> dict:
                     }
                 ]
             },
-            response.choices[0].message,
+            observer_plan_message,
             *results
             ],
     }
@@ -229,6 +305,7 @@ def ChemEagle(image_path: str) -> dict:
 
 
     
+    # 获取 GPT 生成的结果
     gpt_output = json.loads(response.choices[0].message.content)
     print(gpt_output)
     return gpt_output
