@@ -43,6 +43,7 @@ namespaces = false
 [tool.setuptools]
 # packages = ["chemietoolkit", "chemiener", "molnextr", "rxnim", "pdfmodel","chemietoolkit.*", "chemiener.*", "molnextr.*", "rxnim.*", "pdfmodel.*"]
 py-modules = []
+include-package-data = true
 
 # [project]
 # name = "chemeagle"
