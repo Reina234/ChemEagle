@@ -36,7 +36,7 @@ chemrxnextractor = { git = "https://github.com/Reina234/ChemRxnExtractor.git" }
 
 [tool.setuptools.packages.find]
 where = ["."]  
-include = ["chemietoolkit", "chemiener", "molnextr", "rxnim", "pdfmodel"]
+include = ["chemietoolkit*", "chemiener*", "molnextr*", "rxnim*", "pdfmodel*"]
 exclude =  ["prompt", "examples"]
 namespaces = false 
 
