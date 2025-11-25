@@ -1,3 +1,7 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "chemeagle"
 version = "0.1.0"
@@ -24,19 +28,59 @@ dependencies = [
     "timm==0.4.9",
     "torch>=2.9.1",
     "torchvision>=0.24.1",
-    "transformers>=4.49.0",
+    "transformers>=4.49.0"
 ]
 
 [tool.uv.sources]
 chemrxnextractor = { git = "https://github.com/Reina234/ChemRxnExtractor.git" }
 
-
 [tool.setuptools]
+packages = ["chemietoolkit", "chemiener", "molnextr", "rxnim", "pdfmodel"]
 py-modules = []
 
-[tool.setuptools.packages.find]
-where = ["."]  
-include = ["chemietoolkit", "chemiener", "molnextr", "rxnim", "pdfmodel"]
-exclude =  ["prompt", "examples"]
-namespaces = false 
+# [project]
+# name = "chemeagle"
+# version = "0.1.0"
+# description = "Add your description here"
+# readme = "README.md"
+# requires-python = "==3.11.*"
+# dependencies = [
+#     "albumentations==1.1.0",
+#     "chemrxnextractor",
+#     "easyocr",
+#     "ipython",
+#     "layoutparser",
+#     "matplotlib",
+#     "numpy",
+#     "opennmt-py==2.2.0",
+#     "pillow",
+#     "pycocotools",
+#     "pydantic",
+#     "pypdf2",
+#     "rdkit",
+#     "setuptools>=80.9.0",
+#     "smilespe",
+#     "sympy>=1.14.0",
+#     "timm==0.4.9",
+#     "torch>=2.9.1",
+#     "torchvision>=0.24.1",
+#     "transformers>=4.49.0",
+# ]
+
+# [build-system]
+# requires = ["setuptools>=61.0", "wheel"]
+# build-backend = "setuptools.build_meta"
+
+# [tool.uv.sources]
+# chemrxnextractor = { git = "https://github.com/Reina234/ChemRxnExtractor.git" }
+
+
+# [tool.setuptools]
+# py-modules = []
+
+# [tool.setuptools.packages.find]
+# where = ["."]  
+# include = ["chemietoolkit", "chemiener", "molnextr", "rxnim", "pdfmodel"]
+# exclude =  ["prompt", "examples"]
+# namespaces = false 
 
