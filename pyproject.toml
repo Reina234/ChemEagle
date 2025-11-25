@@ -35,7 +35,7 @@ dependencies = [
 chemrxnextractor = { git = "https://github.com/Reina234/ChemRxnExtractor.git" }
 
 [tool.setuptools]
-packages = ["chemietoolkit", "chemiener", "molnextr", "rxnim", "pdfmodel"]
+packages = ["chemietoolkit", "chemiener", "molnextr", "rxnim", "pdfmodel","chemietoolkit*", "chemiener*", "molnextr*", "rxnim*", "pdfmodel*"]
 py-modules = []
 
 # [project]
