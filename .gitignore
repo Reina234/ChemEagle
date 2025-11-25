@@ -1,0 +1,15 @@
+cre_models_v0.1/
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+.venv
+
+*.ckpt
+*.Python
+
+.env
+
+test_refactor.py

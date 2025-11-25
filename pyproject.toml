@@ -1,0 +1,27 @@
+[project]
+name = "chemeagle"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = "==3.11.*"
+dependencies = [
+    "albumentations==1.1.0",
+    "chemrxnextractor",
+    "easyocr>=1.7.2",
+    "ipython>=9.7.0",
+    "layoutparser>=0.3.4",
+    "matplotlib>=3.10.7",
+    "numpy>=2.3.5",
+    "opennmt-py==2.2.0",
+    "pillow>=12.0.0",
+    "pycocotools>=2.0.10",
+    "pydantic>=2.12.4",
+    "pypdf2>=3.0.1",
+    "rdkit>=2025.9.1",
+    "smilespe>=0.0.3",
+    "timm==0.4.9",
+    "transformers>=4.57.2",
+]
+
+[tool.uv.sources]
+chemrxnextractor = { git = "https://github.com/Reina234/ChemRxnExtractor.git" }
