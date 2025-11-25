@@ -27,4 +27,4 @@ dependencies = [
 chemrxnextractor = { git = "https://github.com/Reina234/ChemRxnExtractor.git" }
 
 [tool.setuptools.packages]
-find = { include = ["chemietoolkit", "chemiener", "molnextr", "rxnim"] }
+find = { include = ["chemietoolkit", "chemiener", "molnextr", "rxnim", "pdfmodel"],   exclude = ["prompt", "examples"] }
